@@ -36,6 +36,15 @@ if ($] > 5.020000) {
     );
 }
 
+# Detect the line number reporting behaviour of this version of perl
+our $use_block_end;
+BEGIN {
+    sub X { my (undef, undef, $line) = caller;
+                $use_block_end++ if ($line != shift); }
+    X __LINE__, # $use_block_end = 0
+    sub { }     # $use_block_end = 1
+};
+
 subtest_streamed 'hub tests' => sub {
     my $hub = Test::Stream::Sync->stack->top;
     isa_ok($hub, 'Test::Stream::Hub', 'Test::Stream::Hub::Subtest');
@@ -82,7 +91,7 @@ like(
 my @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => $use_block_end ? __LINE__ + 4 : __LINE__ + 1;
         subtest_streamed 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -111,7 +120,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => $use_block_end ? __LINE__ + 4 : __LINE__ + 1;
         subtest_streamed 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(0, "fail");
@@ -140,7 +149,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => $use_block_end ? __LINE__ + 5 : __LINE__ + 1;
         subtest_streamed 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -172,7 +181,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => $use_block_end ? __LINE__ + 5 : __LINE__ + 1;
         subtest_streamed 'foo' => sub {
             plan 1;
             push @lines => __LINE__ + 1;
@@ -204,7 +213,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => $use_block_end ? __LINE__ + 5 : __LINE__ + 1;
         subtest_streamed 'foo' => sub {
             skip_all 'bleh';
             push @lines => __LINE__ + 1;
@@ -246,7 +255,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => $use_block_end ? __LINE__ + 4 : __LINE__ + 1;
         subtest_buffered 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -274,7 +283,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => $use_block_end ? __LINE__ + 4 : __LINE__ + 1;
         subtest_buffered 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(0, "fail");
@@ -302,7 +311,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => $use_block_end ? __LINE__ + 5 : __LINE__ + 1;
         subtest_buffered 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -333,7 +342,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => $use_block_end ? __LINE__ + 5 : __LINE__ + 1;
         subtest_buffered 'foo' => sub {
             plan 1;
             push @lines => __LINE__ + 1;
@@ -364,7 +373,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => $use_block_end ? __LINE__ + 5 : __LINE__ + 1;
         subtest_buffered 'foo' => sub {
             skip_all 'bleh';
             push @lines => __LINE__ + 1;
